@@ -6,6 +6,7 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.widget.Adapter;
+import android.widget.Toast;
 
 import com.naeemsiddiq.moviesapp.R;
 import com.naeemsiddiq.moviesapp.adapter.MoviesAdapter;
@@ -25,7 +26,7 @@ public class MainActivity extends AppCompatActivity {
     private List<Movies> moviesList = new ArrayList<>();
     private RecyclerView recyclerView;
     private MoviesAdapter moviesAdapter;
-
+    private Call<List<Movies>> moviesListCall;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
         try {
 
             ApiService apiService = ApiClient.getRetrofit().create(ApiService.class);
-            Call<List<Movies>> moviesListCall = apiService.getMoviesData();
+            moviesListCall = apiService.getMoviesData();
 
             moviesListCall.enqueue(new Callback<List<Movies>>() {
                 @Override
@@ -56,6 +57,7 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onFailure(Call<List<Movies>> call, Throwable t) {
 
+                    Toast.makeText(MainActivity.this, "Network Call Problem!!!", Toast.LENGTH_SHORT).show();
                 }
             });
         } catch (Exception e) {
@@ -63,5 +65,11 @@ public class MainActivity extends AppCompatActivity {
         }
 
 
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        moviesListCall.cancel();
     }
 }
